@@ -1,4 +1,18 @@
 h1. Public Holidays
 
 Public bank holiday database and holiday definition framework.
-Dates
+
+h2. Tasks
+
+h6. General Format
+
+bc. rake TASK_NAME VARNAME=default [VARNAME=default] 
+
+h6. Create/Refresh all databases 
+
+bc. rake create [RANGE=1970..2030] 
+
+h6. List all holidays for a specific country 
+
+bc. rake list COUNTRY=name [RANGE=1970..2030]
+ 

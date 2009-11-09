@@ -6,8 +6,34 @@ task :default => :create
 
 desc 'Create new definitions'
 task :create do
-  range = (1970..2030)
-  
+  range = parse_range
+  each_source do |klass, name|
+    path = File.expand_path(PH_ROOT + "/db/#{name}.yml")
+    
+    puts "Writing #{path}"
+    File.open(path, 'w') do |file|
+      file << klass.create(range).to_yaml
+    end  
+  end
+end
+
+desc 'List holidays (add COUNTRY env-variable, Example: COUNTRY=england)'
+task :list do
+  raise "No COUNTRY variable given" unless ENV['COUNTRY']
+  range = parse_range
+    
+  each_source do |klass, name|  
+    next unless name == ENV['COUNTRY'].to_s.downcase
+      
+    path = File.expand_path(PH_ROOT + "/db/#{name}.yml")
+    klass.create(range).each do |date|
+      puts date.strftime('%a, %d %b %Y')
+    end
+  end
+end
+
+
+def each_source(&block)
   Dir[PH_ROOT + '/lib/public_holidays/*.rb'].sort.each do |file|
     require file
     name  = File.basename(file, '.rb')
@@ -22,11 +48,12 @@ task :create do
     end
     next unless klass < PublicHolidays::Abstract
     
-    path = File.expand_path(PH_ROOT + "/db/#{name}.yml")
-    
-    puts "Writing #{path}"
-    File.open(path, 'w') do |file|
-      file << klass.create(range).to_yaml
-    end
-  end
+    yield(klass, name)
+  end  
 end
+
+def parse_range
+  range = eval(ENV['RANGE'].to_s) rescue nil
+  range.is_a?(Range) ? range : (1970..2030)
+end
+

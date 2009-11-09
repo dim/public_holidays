@@ -80,18 +80,21 @@ module PublicHolidays
       Date.civil(*args)
     end
     
-    def self.create(range)
-      base = range.map do |year|      
-        year = new(year)      
+    def self.create(range)      
+      range.map do |year|                 
+        year = new(year)
         holidays.map do |name|
           year.__send__(name.to_sym)
-        end
-      end.flatten
-      (base + extra_dates).sort
+        end + year.extra_dates 
+      end.flatten.sort
     end
   
     def initialize(year)
       @year = year
+    end
+    
+    def extra_dates
+      self.class.extra_dates.select {|i| i.year == self.year }
     end
         
     protected
